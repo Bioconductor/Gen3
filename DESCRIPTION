@@ -1,0 +1,23 @@
+Package: Gen3
+Title: Interface to Gen3 Data Services Within AnVIL
+Version: 0.0.1
+Authors@R: 
+    person(
+        given = "Morgan",
+        family = "Martin",
+        role = c("aut", "cre"),
+        email = "Martin.Morgan@RoswellPark.org",
+        comment = c(ORCID = "0000-0002-5874-8148")
+    )
+Description: Interface to Gen3 data discovery and query services with
+    the NHGRI AnVIL computational cloud. Functionality includes
+    user-friendly authentication and basic data discovery (study,
+    particpant, sample information) as well as support for direct
+    GraphQL queries. Also included is developer-oriented access to the
+    main Gen3 RESTful interfaces.
+Imports: AnVIL
+License: Artistic-2.0
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1

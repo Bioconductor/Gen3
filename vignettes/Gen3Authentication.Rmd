@@ -1,0 +1,123 @@
+---
+title: Gen3 Authentication Demo
+author:
+- name: BJ Stubbs
+- name: Martin Morgan
+pacakge: Gen3
+output:
+  BiocStyle::html_document
+vignette: |
+  %\VignetteIndexEntry{Introduction to the AnVIL package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Intro
+
+This is a demo of how to login and query Gen3 from R.
+
+This is based on:
+
+* https://gen3.org/resources/user/using-api/
+* https://gen3.org/resources/developer/flat-model-api/
+* https://graphql.org/learn/queries/
+* https://graphql.org/learn/introspection/
+
+# Load Libraries
+
+```{r}
+## BiocManager::install("Bioconductor/Gen3")
+library(Gen3) # devtools::load_all()
+```
+
+# Get Gen3 access token
+
+Go to this url: https://gen3.theanvil.io login, then click on the profile link. There you can create an access credential. Download this json file and remember its location.
+
+# Load access token from the credentials file and set Gen3 login url
+
+```{r}
+credentials <- system.file(package="Gen3", "secrets", "credentials.json")
+authenticate(credentials)
+```
+
+# Set up a query
+
+The first query we will do is to find all of the projects that we have access to.
+
+This query will return the project id and gen3 id for each project
+
+```{r}
+projects()
+```
+
+# Get schema types for Gen3. These contain the root entities for queries.
+
+```{r}
+schema()
+## schema("full")
+```
+
+# Inspect Subjects
+
+We can get the fields available in the subject schema like this:
+
+```{r}
+fields("subject") # any `name` of schema()
+```
+
+These fields are the basis of data queries.
+
+# Inspect Subject Phenodata
+
+This lets you search across every study you have access to. I am limiting this to 10 results. To get all of the data, change (first:10) to (first:0)
+
+```{r}
+values("subject", "id", "project_id", "affected_status", .n = 10)
+```
+
+
+# Inspect Sample Data
+
+Similarly, we can ge the fields for samples.
+
+```{r}
+fields("sample")
+```
+
+These fields can be queried as such
+
+```{r}
+values("sample", "id", "rin_number", .n = 10)
+```
+
+# Inspect Sequencing
+
+```{r}
+fields("sequencing")
+```
+
+Which can be queried as such
+
+```{r}
+values("sequencing", "id", "file_name")
+```
+
+# Filtering
+
+Queries can specify filtering parameters.
+
+For example:
+
+```{r, eval = FALSE}
+myl=list(query='{
+  subject(first:10, project_id:"open_access-1000Genomes") {
+    id
+    project_id
+    sex
+  }
+}')
+query=toJSON(myl,auto_unbox=TRUE)
+result=httr::POST(url2, body=query, encode="json",httr::add_headers(Authorization=paste("Bearer",bearertoken)))
+fromJSON(content(result,"text"))
+```

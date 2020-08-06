@@ -1,18 +1,18 @@
 ---
-title: Gen3 Authentication Demo
+title: Accessing Gen3 in the AnVIL
 author:
 - name: BJ Stubbs
 - name: Martin Morgan
-pacakge: Gen3
+package: Gen3
 output:
   BiocStyle::html_document
 vignette: |
-  %\VignetteIndexEntry{Introduction to the AnVIL package}
+  %\VignetteIndexEntry{Accessing Gen3 in the AnVIL}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-# Intro
+# Introduction
 
 This is a demo of how to login and query Gen3 from R.
 
@@ -23,101 +23,198 @@ This is based on:
 * https://graphql.org/learn/queries/
 * https://graphql.org/learn/introspection/
 
-# Load Libraries
+A very useful facility for formulating GraphQL queries is
+
+* https://gen3.theanvil.io/query
+
+## Package installation and loading
+
+If necessary, install the Gen3 library
 
 ```{r}
-## BiocManager::install("Bioconductor/Gen3")
-library(Gen3) # devtools::load_all()
+if (!"Gen3" %in% rownames(installed.packages()))
+    BiocManager::install("Bioconductor/Gen3")
 ```
 
-# Get Gen3 access token
+Load the library into the current _R_ session. Also useful for this
+vignette is the dplyr package.
 
-Go to this url: https://gen3.theanvil.io login, then click on the profile link. There you can create an access credential. Download this json file and remember its location.
+```{r}
+library(Gen3)
+library(dplyr)
+```
 
-# Load access token from the credentials file and set Gen3 login url
+## Authentication
+
+Go to this url: https://gen3.theanvil.io and login, then click on the
+profile link. There you can create an access credential. Download this
+json file and remember its location.
+
+Load the access token from the credentials file and authenticate with
+Gen3. Adjust the value of `credentials` to reflect the location of the
+credentials file you obtained from Gen3.
 
 ```{r}
 credentials <- system.file(package="Gen3", "secrets", "credentials.json")
 authenticate(credentials)
 ```
 
-# Set up a query
+If a session has been idle for a while, the authentication credentials
+may expire, resulting in a message like
 
-The first query we will do is to find all of the projects that we have access to.
+```
+Error in .query(body) : Unauthorized (HTTP 401).
+```
 
-This query will return the project id and gen3 id for each project
+Simply renew credentials using `authenticate()` as described above.
+
+# Schema discovery and principles of data exploration
+
+Get schema types for Gen3. These contain the root entities for queries.
 
 ```{r}
+## { __schema { types { name } } }
+schema()
+```
+
+`schema("full")` provides a more complete list of schema entities. The
+GraphQL query performed by this function is summariized in the
+comment.
+
+Each schema entry is associated with fields; discover these with, e.g.,
+
+```{r}
+## { __type(name: subject) { fields{ name } } }
+fields("subject")
+```
+
+`values()` performs a query against the database. The first argument
+is the name of the entity to be retrieved; subsequent arguments are
+the fields within that entity. The number of records returned is given
+by `.n`, which has a default value of 10. Use `.n = 0` to retrieve all
+entities.
+
+```{r}
+## { subject(first: 50) { id project_id sex } }
+values("subject", "id", "project_id", "sex", .n = 50)
+```
+
+# An initial exploration
+
+## Projects
+
+The first query we will do is to find all of the projects that we have
+access to. `projects()` returns the fields `project_id`, `id`, and
+`study_description` from all projects we have access to.
+
+```{r}
+## { project(first: 0) { project_id id study_description } }
 projects()
 ```
 
-# Get schema types for Gen3. These contain the root entities for queries.
+## Subject, sample and sequencing entities
+
+The main entities in Gen3 are subject, sample, and sequencing. Get
+the fields available in the subject entity like this:
 
 ```{r}
-schema()
-## schema("full")
-```
-
-# Inspect Subjects
-
-We can get the fields available in the subject schema like this:
-
-```{r}
+## { __type(name: subject) { fields { name } } }
 fields("subject") # any `name` of schema()
 ```
 
-These fields are the basis of data queries.
-
-# Inspect Subject Phenodata
-
-This lets you search across every study you have access to. I am limiting this to 10 results. To get all of the data, change (first:10) to (first:0)
+Similarly, the fields for 'sample' and 'sequencing' are
 
 ```{r}
-values("subject", "id", "project_id", "affected_status", .n = 10)
-```
-
-
-# Inspect Sample Data
-
-Similarly, we can ge the fields for samples.
-
-```{r}
+## { __type(name: sample) { fields { name } } }
 fields("sample")
-```
 
-These fields can be queried as such
-
-```{r}
-values("sample", "id", "rin_number", .n = 10)
-```
-
-# Inspect Sequencing
-
-```{r}
+## { __type(name: sequencing) { fields { name } } }
 fields("sequencing")
 ```
 
-Which can be queried as such
+Query the value of fields, across all projects, with
 
 ```{r}
+## { sample(first: 10) { id rin_number } }
+values("sample", "id", "rin_number", .n = 10)
+
+## { sequencing(first: 10) { id file_name } }
 values("sequencing", "id", "file_name")
 ```
 
-# Filtering
+The Gen3 schema attempts to represent subjects (for example) from all
+studies in a single entity, so the value of many fields may be missing
+(`null` in the GraphQL respond, represented as `NA` in _R_).
 
-Queries can specify filtering parameters.
+```{r}
+values("subject", "project_id", "weight", "age_of_onset")
+```
 
-For example:
+# Direct use of GraphQL
 
-```{r, eval = FALSE}
-myl=list(query='{
-  subject(first:10, project_id:"open_access-1000Genomes") {
-    id
-    project_id
-    sex
-  }
-}')
-query=toJSON(myl,auto_unbox=TRUE)
-result=httr::POST(url2, body=query, encode="json",httr::add_headers(Authorization=paste("Bearer",bearertoken)))
-fromJSON(content(result,"text"))
+Use GraphQL directly for more complicated queries, e.g., filtering parameters.
+
+For example queries the `subject` field restricted to those with the
+"open_access-1000Genomes" `project_id` for four values: `id`, `sex`,
+`population`, and `submitter_id`. Using `first: 0` returns all
+records.
+
+```{r}
+query <- '{
+    subject(
+        project_id: "open_access-1000Genomes"
+        first: 0
+    ) {
+        id
+        sex
+        population
+        submitter_id
+    }
+}'
+result <- query_graphql(query)
+```
+
+The return value is a list with structure like that of the
+query. values for each subject have been simiplified to a tibble. The
+elements of the list are accessible using standard _R_ operations
+
+```{r}
+result$subject
+```
+
+The following query retrieves the `id` and `tissue_type` of all samples in GTEx.
+
+```{r}
+query <- '{
+    sample(
+        project_id: "CF-GTEx"
+        first: 0
+    ) {
+        id
+        tissue_type
+    }
+}'
+result <- query_graphql(query)
+result$sample
+```
+
+The tibble is easily explored using standard tidy paradigms, e.g.,
+
+```{r}
+result$sample %>%
+    count(tissue_type) %>%
+    arrange(desc(n))
+```
+
+Syntax errors return an error from the server
+
+```{r}
+query <- '{ oops(forgot trailing brace)'
+tryCatch(query_graphql(query), error = identity)
+```
+
+# Session information
+
+```{r}
+sessionInfo()
 ```

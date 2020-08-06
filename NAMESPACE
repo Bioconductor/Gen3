@@ -3,6 +3,7 @@
 export(authenticate)
 export(fields)
 export(projects)
+export(query_graphql)
 export(schema)
 export(values)
 importFrom(dplyr,"%>%")

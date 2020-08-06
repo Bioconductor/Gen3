@@ -1,9 +1,10 @@
 .GEN3_GRAPHQL <- "https://gen3.theanvil.io/api/v0/submission/graphql/"
+.GEN3_FLATQL <-  "https://gen3.theanvil.io/guppy/graphql/"
 
 #' @importFrom tibble as_tibble
 #'
 #' @importFrom httr add_headers
-.query <-
+.query_graphql <-
     function(body)
 {
     token <- .BEARER_TOKEN()
@@ -19,10 +20,7 @@
 projects <-
     function()
 {
-    body <- '{ "query" : "{ project(first:0) {project_id id} }" }'
-    content <- .query(body)
-    project <- fromJSON(content)[[c("data", "project")]]
-    as_tibble(project)
+    values("project", "project_id", "id", "study_description", .n = 0L)
 }
 
 #' @importFrom jsonlite toJSON
@@ -38,7 +36,7 @@ schema <-
     as <- match.arg(as)
 
     body <- '{"query":"{__schema { types{name} } }"}'
-    content <- .query(body)
+    content <- .query_graphql(body)
     types <- fromJSON(content)[[c("data", "__schema", "types")]]
     tbl <- as_tibble(types)
 
@@ -56,11 +54,11 @@ fields <-
     stopifnot(.is_scalar_character(type_name))
     as <- match.arg(as)
 
-    q <- sprintf('{__type(name: "%s") {name fields{name}}}', type_name)
+    q <- sprintf('{__type(name: "%s") { fields { name } } }', type_name)
     myl <- list(query=q)
     body <- toJSON(myl, auto_unbox=TRUE)
 
-    content <- .query(body)
+    content <- .query_graphql(body)
     fields <- fromJSON(content)[[c("data", "__type", "fields")]]
     tbl <- as_tibble(fields)
 
@@ -92,7 +90,20 @@ values <-
     myl <- list(query = q)
     body <- toJSON(myl, auto_unbox=TRUE)
 
-    content <- .query(body)
+    content <- .query_graphql(body)
     subject <- fromJSON(content)[[c("data", type_name)]]
     as_tibble(subject)
+}
+
+#' @export
+query_graphql <-
+    function(query)
+{
+    stopifnot(.is_scalar_character(query))
+
+    body <- gsub("[[:space:]]+", " ", query)
+    json <- toJSON(list(query = body), auto_unbox = TRUE)
+    content <- .query_graphql(json)
+    result <- fromJSON(content)[["data"]]
+    .tibbilize_list(result)
 }

@@ -5,6 +5,11 @@
     function(value) {
         if (!missing(value))
             token <<- value
+        if (is.null(token))
+            stop(
+                "please 'authenticate()' before preforming queries",
+                call. = FALSE
+            )
         token
     }
 })

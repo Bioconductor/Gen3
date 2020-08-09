@@ -19,9 +19,9 @@
 .tibbilize_list <-
     function(lst)
 {
-    if (is(lst, "data.frame")) {
+    if (inherits(lst, "data.frame")) {
         lst <- as_tibble(lst)
-    } else if (is(lst, "list")) {
+    } else if (inherits(lst, "list")) {
         lst <- lapply(lst, .tibbilize_list)
     }
     lst

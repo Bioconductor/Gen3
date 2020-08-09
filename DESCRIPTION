@@ -1,6 +1,6 @@
 Package: Gen3
 Title: Interface to Gen3 Data Services Within AnVIL
-Version: 0.0.3
+Version: 0.0.4
 Authors@R: c(
     person(
         "Martin", "Morgan",
@@ -23,7 +23,8 @@ Imports:
     tibble,
     dplyr
 Suggests:
-    knitr
+    knitr,
+    BiocManager
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true

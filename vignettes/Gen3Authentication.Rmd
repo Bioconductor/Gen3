@@ -12,6 +12,12 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, setup, include=FALSE}
+cache <- tools::R_user_dir("Gen3", "cache")
+credentials <- file.path(cache, "credentials.json")
+knitr::opts_chunk$set(eval = file.exists(credentials))
+```
+
 # Introduction
 
 This is a demo of how to login and query Gen3 from R.
@@ -55,7 +61,8 @@ Gen3. Adjust the value of `credentials` to reflect the location of the
 credentials file you obtained from Gen3.
 
 ```{r}
-credentials <- system.file(package="Gen3", "secrets", "credentials.json")
+cache <- tools::R_user_dir("Gen3", "cache")
+credentials <- file.path(cache, "credentials.json")
 authenticate(credentials)
 ```
 
@@ -209,7 +216,7 @@ result$sample %>%
 Syntax errors return an error from the server
 
 ```{r}
-query <- '{ oops(forgot trailing brace)'
+query <- '{ sample { id }'
 tryCatch(query_graphql(query), error = identity)
 ```
 

@@ -17,6 +17,7 @@ Description: Interface to Gen3 data discovery and query services with
     GraphQL queries. Also included is developer-oriented access to the
     main Gen3 RESTful interfaces.
 Imports:
+    AnVIL,
     rlang,
     httr,
     jsonlite,

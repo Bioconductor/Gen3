@@ -52,18 +52,38 @@ library(dplyr)
 
 ## Authentication
 
-Go to this url: https://gen3.theanvil.io and login, then click on the
-profile link. There you can create an access credential. Download this
-json file and remember its location.
+Authenticate either for direct access to Gen3, or for access mediated
+by AnVIL.
 
-Load the access token from the credentials file and authenticate with
-Gen3. Adjust the value of `credentials` to reflect the location of the
-credentials file you obtained from Gen3.
+To obtain credentials for direct access to Gen3, visit
+https://gen3.theanvil.io, login, and click on the profile icon.
+There you can create an access credential as a JSON file. Download
+this file and remember its location. Do not share this file with
+others. A convenient location to store the credentials file is at
+this location:
 
 ```{r}
 cache <- tools::R_user_dir("Gen3", "cache")
 credentials <- file.path(cache, "credentials.json")
+```
+
+Authenticate using these credentials with
+
+```{r}
 authenticate(credentials)
+```
+
+To use with an AnVIL account, log in to
+https://anvil.terra.bio, select the 'Profile' item on the
+'HAMBURGER' dropdown, and use 'NHGRI AnVIL Data Commons
+Framework Services' to link AnVIL with your Gen3 account. When
+on the AnVIL platform, or with the `gcloud` binary on your
+search path and with `AnVIL::gcloud_cmd("auth", "list")`
+incidating the correct account for AnVIL access, gain access to
+Gen3 with no arguments
+
+```{r, eval = FALSE}
+authenticate()
 ```
 
 If a session has been idle for a while, the authentication credentials
@@ -73,7 +93,8 @@ may expire, resulting in a message like
 Error in .query(body) : Unauthorized (HTTP 401).
 ```
 
-Simply renew credentials using `authenticate()` as described above.
+Simply renew credentials using the appropriate form of
+`authenticate()` as described above.
 
 # Schema discovery and principles of data exploration
 

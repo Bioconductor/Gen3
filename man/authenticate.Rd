@@ -4,11 +4,11 @@
 \alias{authenticate}
 \title{Authenticate against gen3.theanvil.io}
 \usage{
-authenticate(file)
+authenticate(file = NULL)
 }
 \arguments{
-\item{file}{character(1) file path to json credentials, as
-described in the 'details' section.}
+\item{file}{character(1) or NULL. If character(1), file path to
+json credentials, as described in the 'details' section.}
 }
 \value{
 The bearer token used for authentication, invisibly
@@ -20,14 +20,22 @@ the duration of the \emph{R} session, or until authentication
 expires using criteria defined on the server.
 }
 \details{
-To obtain credentials, visit https://gen3.theanvil.io,
-login, and click on the profile icon. There you can create an
-access credential as a JSON file. Download this file and
-remember its location. Do not share this file with others.\preformatted{A convenient location to store the credentials file is at this
-location:
-
-    cache <- tools::R_user_dir("Gen3", "cache")
+To obtain credentials for direct access to Gen3, visit
+https://gen3.theanvil.io, login, and click on the profile
+icon. There you can create an access credential as a JSON
+file. Download this file and remember its location. Do not
+share this file with others. A convenient location to store
+the credentials file is at this location:\preformatted{    cache <- tools::R_user_dir("Gen3", "cache")
     credentials <- file.path(cache, "credentials.json")
+
+To use with an AnVIL account, log in to
+https://anvil.terra.bio, select the 'Profile' item on the
+'HAMBURGER' dropdown, and use 'NHGRI AnVIL Data Commons
+Framework Services' to link AnVIL with your Gen3 account. When
+on the AnVIL platform, or with the `gcloud` binary on your
+search path and with `AnVIL::gcloud_cmd("auth", "list")`
+incidating the correct account for AnVIL access, gain access to
+Gen3 with no arguments, `authenticate()`.
 }
 }
 \examples{

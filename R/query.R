@@ -36,15 +36,18 @@
 #' stopifnot(
 #'     `no credentials file, cannot authenticate` = file.exists(credentials)
 #' )
-#'     
+#'
 #' authenticate(credentials)
 #' projects()
+#'
+#' @importFrom dplyr mutate "%>%"
 #'
 #' @export
 projects <-
     function()
 {
-    values("project", "project_id", "id", "study_description", .n = 0L)
+    values("project", "project_id", "id", "study_description", .n = 0L) %>%
+        mutate(study_description = trimws(.data$study_description))
 }
 
 #' @rdname query
@@ -103,8 +106,9 @@ schema <-
 #'     for `fields()`, `"brief"` returns fields that do not start with
 #'     an underscore. `"full"` returns all fields.
 #'
-#' @return `fields()` returns a tibble with columns `type_name` and
-#'     `field` (name of corresponding fields in type name).
+#' @return `fields()` returns a tibble with columns `type_name`,
+#'     `field` (name of corresponding fields in type name) and `type`
+#'     (type of field, e.g., String, Int).
 #'
 #' @examples
 #' fields("subject")
@@ -116,7 +120,10 @@ fields <-
     stopifnot(.is_scalar_character(type_name))
     as <- match.arg(as)
 
-    q <- sprintf('{__type(name: "%s") { fields { name } } }', type_name)
+    q <- sprintf(
+        '{__type(name: "subject") { fields { name type { name } } } }',
+        type_name
+    )
     myl <- list(query=q)
     body <- toJSON(myl, auto_unbox=TRUE)
 
@@ -124,6 +131,7 @@ fields <-
     fields <- fromJSON(content)[[c("data", "__type", "fields")]]
     tbl <-
         bind_cols(type_name = type_name, as_tibble(fields)) %>%
+        mutate(type = unlist(.data$type)) %>%
         rename(field = "name")
 
     switch(

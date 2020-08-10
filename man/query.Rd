@@ -40,8 +40,9 @@ accessbile to the current user.
 \code{schema()} returns a tibble with with a single columm
 (\code{"name"}) corresponding to the type names available in Gen3.
 
-\code{fields()} returns a tibble with columns \code{type_name} and
-\code{field} (name of corresponding fields in type name).
+\code{fields()} returns a tibble with columns \code{type_name},
+\code{field} (name of corresponding fields in type name) and \code{type}
+(type of field, e.g., String, Int).
 
 \code{values()} returns a tibble with type_name and field names
 as columns, with one row for each record queried.

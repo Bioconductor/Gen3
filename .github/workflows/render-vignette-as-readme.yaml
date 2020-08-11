@@ -30,6 +30,14 @@ jobs:
           BiocManager::install(c("Bioconductor/AnVIL", "rmarkdown"))
           remotes::install_local(".")
         shell: Rscript {0}
+      - name: add Gen3 credentials as file
+        shell: Rscript {0}
+        env:
+            GEN3_CREDENTIALS_JSON: ${{ secrets.GEN3_CREDENTIALS_JSON }}
+        run: |
+          cache = tools::R_user_dir("Gen3", "cache")
+          credentials <- file.path(cache, "credentials.json")
+          writeLines(Sys.getenv("GEN3_CREDENTIALS_JSON"), credentials)
       - name: Render vignette
         run: |
           rmarkdown::render(

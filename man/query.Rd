@@ -76,7 +76,7 @@ credentials <- file.path(cache, "credentials.json")
 stopifnot(
     `no credentials file, cannot authenticate` = file.exists(credentials)
 )
-    
+
 authenticate(credentials)
 projects()
 

@@ -45,15 +45,28 @@ if (!"Gen3" %in% rownames(installed.packages()))
 Load the library into the current _R_ session. Also useful for this
 vignette is the dplyr package.
 
-```{r}
+```{r, message = FALSE}
 library(Gen3)
 library(dplyr)
 ```
 
 ## Authentication
 
-Authenticate either for direct access to Gen3, or for access mediated
-by AnVIL.
+Authenticate either for access mediated by AnVIL, or for direct access
+to Gen3.
+
+To use with an AnVIL account, log in to
+https://anvil.terra.bio, select the 'Profile' item on the
+'HAMBURGER' dropdown, and use 'NHGRI AnVIL Data Commons
+Framework Services' to link AnVIL with your Gen3 account. When
+on the AnVIL platform, or with the `gcloud` binary on your
+search path and with `AnVIL::gcloud_cmd("auth", "list")`
+incidating the correct account for AnVIL access, gain access to
+Gen3 with no arguments
+
+```{r, eval = FALSE}
+authenticate()
+```
 
 To obtain credentials for direct access to Gen3, visit
 https://gen3.theanvil.io, login, and click on the profile icon.
@@ -71,19 +84,6 @@ Authenticate using these credentials with
 
 ```{r}
 authenticate(credentials)
-```
-
-To use with an AnVIL account, log in to
-https://anvil.terra.bio, select the 'Profile' item on the
-'HAMBURGER' dropdown, and use 'NHGRI AnVIL Data Commons
-Framework Services' to link AnVIL with your Gen3 account. When
-on the AnVIL platform, or with the `gcloud` binary on your
-search path and with `AnVIL::gcloud_cmd("auth", "list")`
-incidating the correct account for AnVIL access, gain access to
-Gen3 with no arguments
-
-```{r, eval = FALSE}
-authenticate()
 ```
 
 If a session has been idle for a while, the authentication credentials
@@ -125,6 +125,13 @@ entities.
 ```{r}
 ## { subject(first: 50) { id project_id sex } }
 values("subject", "id", "project_id", "sex", .n = 50)
+```
+
+Bad queries return informative error messages
+
+```{r, error = TRUE}
+values("subjects", "id")
+values("subject", "foo")
 ```
 
 # An initial exploration
@@ -236,9 +243,9 @@ result$sample %>%
 
 Syntax errors return an error from the server
 
-```{r}
+```{r, error = TRUE}
 query <- '{ sample { id }'
-tryCatch(query_graphql(query), error = identity)
+query_graphql(query)
 ```
 
 # Session information

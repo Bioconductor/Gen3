@@ -3,7 +3,7 @@
 
 #' @importFrom tibble as_tibble
 #'
-#' @importFrom httr add_headers
+#' @importFrom httr add_headers http_error http_status
 .query_graphql <-
     function(body)
 {
@@ -11,7 +11,21 @@
     header <- add_headers(Authorization=paste("Bearer", token))
 
     response <- POST(.GEN3_GRAPHQL, body = body, encode="json", header)
-    stop_for_status(response)
+    if (http_error(response)) {
+        status <- http_status(response)
+        msg0 <- paste0(names(status), ": ", unlist(status, use.names = FALSE))
+        msg1 <- content(response)$errors
+        stop(
+            "query failed:\n",
+            paste0(msg0, collapse = "\n"), "\n",
+            "response:\n",
+            paste(
+                strwrap(content(response)$errors, indent = 2, exdent = 4),
+                collapse = "\n"
+            ),
+            call. = FALSE
+        )
+    }
 
     content(response, "text", encoding = "UTF-8")
 }

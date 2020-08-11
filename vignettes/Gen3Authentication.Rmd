@@ -146,17 +146,17 @@ The main entities in Gen3 are subject, sample, and sequencing. Get
 the fields available in the subject entity like this:
 
 ```{r}
-## { __type(name: subject) { fields { name } } }
+## { __type(name: subject) { fields { name type { name } } } }
 fields("subject") # any `name` of schema()
 ```
 
 Similarly, the fields for 'sample' and 'sequencing' are
 
 ```{r}
-## { __type(name: sample) { fields { name } } }
+## { __type(name: sample) { fields { name type { name } } } }
 fields("sample")
 
-## { __type(name: sequencing) { fields { name } } }
+## { __type(name: sequencing) { fields { name type { name }} } }
 fields("sequencing")
 ```
 

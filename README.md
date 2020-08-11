@@ -31,8 +31,18 @@ vignette is the dplyr package.
 Authentication
 --------------
 
-Authenticate either for direct access to Gen3, or for access mediated by
-AnVIL.
+Authenticate either for access mediated by AnVIL, or for direct access
+to Gen3.
+
+To use with an AnVIL account, log in to
+<a href="https://anvil.terra.bio" class="uri">https://anvil.terra.bio</a>,
+select the ‘Profile’ item on the ‘HAMBURGER’ dropdown, and use ‘NHGRI
+AnVIL Data Commons Framework Services’ to link AnVIL with your Gen3
+account. When on the AnVIL platform, or with the `gcloud` binary on your
+search path and with `AnVIL::gcloud_cmd("auth", "list")` incidating the
+correct account for AnVIL access, gain access to Gen3 with no arguments
+
+    authenticate()
 
 To obtain credentials for direct access to Gen3, visit
 <a href="https://gen3.theanvil.io" class="uri">https://gen3.theanvil.io</a>,
@@ -47,16 +57,6 @@ credentials file is at this location:
 Authenticate using these credentials with
 
     authenticate(credentials)
-
-To use with an AnVIL account, log in to
-<a href="https://anvil.terra.bio" class="uri">https://anvil.terra.bio</a>,
-select the ‘Profile’ item on the ‘HAMBURGER’ dropdown, and use ‘NHGRI
-AnVIL Data Commons Framework Services’ to link AnVIL with your Gen3
-account. When on the AnVIL platform, or with the `gcloud` binary on your
-search path and with `AnVIL::gcloud_cmd("auth", "list")` incidating the
-correct account for AnVIL access, gain access to Gen3 with no arguments
-
-    authenticate()
 
 If a session has been idle for a while, the authentication credentials
 may expire, resulting in a message like
@@ -90,6 +90,11 @@ entities.
 
     ## { subject(first: 50) { id project_id sex } }
     values("subject", "id", "project_id", "sex", .n = 50)
+
+Bad queries return informative error messages
+
+    values("subjects", "id")
+    values("subject", "foo")
 
 An initial exploration
 ======================
@@ -188,7 +193,7 @@ The tibble is easily explored using standard tidy paradigms, e.g.,
 Syntax errors return an error from the server
 
     query <- '{ sample { id }'
-    tryCatch(query_graphql(query), error = identity)
+    query_graphql(query)
 
 Session information
 ===================

@@ -1,7 +1,5 @@
 on:
-  push:
-    paths:
-      - vignettes/Gen3Authentication.Rmd
+  workflow_dispatch
 
 name: Render vignettes/Gen3Authentication.Rmd as README.md
 

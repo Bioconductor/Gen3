@@ -67,6 +67,11 @@ field has associated values that can be retrieved by queries.
 \code{query_graphql()} allows arbitrary queries against the
 graphql database.
 }
+\details{
+Generally, GraphQL \code{schema()} fields starting with '_',
+e.g., '\emph{subjects_count', are returned with the leading '}'
+replaced by '.', e.g., '.subjects_count'.
+}
 \examples{
 ## Authenticate first
 cache <- tools::R_user_dir("Gen3", "cache")

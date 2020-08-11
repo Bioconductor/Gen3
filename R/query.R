@@ -60,7 +60,12 @@
 projects <-
     function()
 {
-    values("project", "project_id", "id", "study_description", .n = 0L) %>%
+    v <- values(
+        "project", "project_id", "id", "study_description",
+        "_subjects_count", "_sequencings_count",
+        .n = 0L
+    )
+    v %>%
         mutate(study_description = trimws(.data$study_description))
 }
 
@@ -160,6 +165,10 @@ fields <-
 #' @description `values()` returns values corresponding to fields of
 #'     `type_name`. Each row represents a record in the database.
 #'
+#' @details Generally, GraphQL `schema()` fields starting with '_',
+#'     e.g., '_subjects_count', are returned with the leading '_'
+#'     replaced by '.', e.g., '.subjects_count'.
+#'
 #' @param ... `character(1)` field(s) to be queried.
 #'
 #' @param .n integer(1) number of records to retieve. The special
@@ -170,6 +179,8 @@ fields <-
 #'
 #' @examples
 #' values("subject", "id", "sex")
+#'
+#' @importFrom dplyr rename_all
 #'
 #' @export
 values <-
@@ -182,6 +193,7 @@ values <-
     )
     if (is.infinite(.n))
         .n <- 0L
+    cols <- unlist(list(...))
 
     q <- sprintf(
         '{ %s( first:%d ) { %s } }',
@@ -194,7 +206,8 @@ values <-
 
     content <- .query_graphql(body)
     subject <- fromJSON(content)[[c("data", type_name)]]
-    as_tibble(subject)
+    as_tibble(subject)[,cols] %>%
+        rename_all(~ sub("^_", ".", .))
 }
 
 #' @rdname query

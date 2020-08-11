@@ -36,6 +36,7 @@ jobs:
             GEN3_CREDENTIALS_JSON: ${{ secrets.GEN3_CREDENTIALS_JSON }}
         run: |
           cache = tools::R_user_dir("Gen3", "cache")
+          dir.create(cache, recursive = TRUE)
           credentials <- file.path(cache, "credentials.json")
           writeLines(Sys.getenv("GEN3_CREDENTIALS_JSON"), credentials)
       - name: Render vignette

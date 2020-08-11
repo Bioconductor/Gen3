@@ -1,7 +1,10 @@
-name: Render vignettes/Gen3Authentication.Rmd as README.md
+name: Render vignette Gen3Authentication.Rmd as README.md
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+    - vignettes/Gen3Authentication.Rmd
 
 jobs:
   render:

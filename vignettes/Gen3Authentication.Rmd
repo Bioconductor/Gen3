@@ -156,7 +156,7 @@ Similarly, the fields for 'sample' and 'sequencing' are
 ## { __type(name: sample) { fields { name type { name } } } }
 fields("sample")
 
-## { __type(name: sequencing) { fields { name type { name }} } }
+## { __type(name: sequencing) { fields { name type { name } } } }
 fields("sequencing")
 ```
 

@@ -121,7 +121,7 @@ fields <-
     as <- match.arg(as)
 
     q <- sprintf(
-        '{__type(name: "subject") { fields { name type { name } } } }',
+        '{__type(name: "%s") { fields { name type { name } } } }',
         type_name
     )
     myl <- list(query=q)

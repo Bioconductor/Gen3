@@ -90,7 +90,12 @@ If a session has been idle for a while, the authentication credentials
 may expire, resulting in a message like
 
 ```
-Error in .query(body) : Unauthorized (HTTP 401).
+> projects()
+Error: query failed:
+category: Client error
+reason: Unauthorized
+message: Client error: (401) Unauthorized
+response:
 ```
 
 Simply renew credentials using the appropriate form of
@@ -139,11 +144,18 @@ values("subject", "foo")
 ## Projects
 
 The first query we will do is to find all of the projects that we have
-access to. `projects()` returns the fields `project_id`, `id`, and
-`study_description` from all projects we have access to.
+access to. `projects()` returns the fields `project_id`, `id`,
+`study_description` from all projects we have access to, as well as
+`_subjects_count` (the number of subjects in the project) and
+`_sequencings_count` (the number of sequening files in the
+project). The latter to column names are mangled to replace the
+leading '_' with '.' to conform to R's column name conventions..
 
 ```{r}
-## { project(first: 0) { project_id id study_description } }
+## { project(first: 0) {
+##       project_id id study_description
+##       _subjects_count _sequencings_count
+## } }
 projects()
 ```
 
@@ -179,7 +191,7 @@ values("sequencing", "id", "file_name")
 
 The Gen3 schema attempts to represent subjects (for example) from all
 studies in a single entity, so the value of many fields may be missing
-(`null` in the GraphQL respond, represented as `NA` in _R_).
+(`null` in the GraphQL response, represented as `NA` in _R_).
 
 ```{r}
 values("subject", "project_id", "weight", "age_of_onset")
@@ -189,9 +201,9 @@ values("subject", "project_id", "weight", "age_of_onset")
 
 Use GraphQL directly for more complicated queries, e.g., filtering parameters.
 
-For example queries the `subject` field restricted to those with the
-"open_access-1000Genomes" `project_id` for four values: `id`, `sex`,
-`population`, and `submitter_id`. Using `first: 0` returns all
+The following example queries the `subject` field restricted to those
+with the "open_access-1000Genomes" `project_id` for four values: `id`,
+`sex`, `population`, and `submitter_id`. Using `first: 0` returns all
 records.
 
 ```{r}

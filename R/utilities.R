@@ -16,6 +16,8 @@
     is.numeric(x) && .is_scalar(x)
 }
 
+.is_object_id <- .is_scalar_character
+
 .tibbilize_list <-
     function(lst)
 {

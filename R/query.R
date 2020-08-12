@@ -42,17 +42,19 @@
 #'     accessbile to the current user.
 #'
 #' @examples
-#' ## Authenticate first
-#' cache <- tools::R_user_dir("Gen3", "cache")
-#' credentials <- file.path(cache, "credentials.json")
+#' ## Authenticate first; prefer authentication with credentials
+#' response <- tryCatch(authenticate(), error = identity)
+#' if (inherits(response, "error")) {
+#'     ## perhaps credentials are cached...
+#'     cache <- tools::R_user_dir("Gen3", "cache")
+#'     credentials <- file.path(cache, "credentials.json")
+#'     stopifnot(
+#'         `no credentials file, cannot authenticate` = file.exists(credentials)
+#'     )
+#'     authenticate(credentials)
+#' }
 #'
-#' ## only run examples if credentials file exists
-#' stopifnot(
-#'     `no credentials file, cannot authenticate` = file.exists(credentials)
-#' )
-#'
-#' authenticate(credentials)
-#' projects()
+#' projects() 
 #'
 #' @importFrom dplyr mutate "%>%"
 #'

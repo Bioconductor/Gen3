@@ -55,7 +55,7 @@ download_stat <-
     stopifnot(
         .is_object_id(object_id)
     )
-        
+
     gs <- .download_object_id_as_gs(object_id)
     gsutil_stat(gs)
 }
@@ -124,6 +124,6 @@ download_object <-
 
     if (is_dir || is_gs_uri)
         destination <- file.path(destination, filename)
-        
+
     destination
 }

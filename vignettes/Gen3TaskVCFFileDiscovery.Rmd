@@ -1,0 +1,201 @@
+---
+title: "Gen3 Task: Finding and Retrieving 1000 Genomes VCF Files"
+author:
+- name: Frederick Tan
+- name: BJ Stubbs
+- name: Martin Morgan
+package: Gen3
+output:
+  BiocStyle::html_document
+vignette: |
+  %\VignetteIndexEntry{Gen3 Task: Finding and Retrieving 1000 Genomes VCF Files}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, setup, include=FALSE}
+eval <- tryCatch({
+    ## pre-requisites for computation of this vignette
+    Gen3::authenticate()
+    AnVIL::avworkspace_namespace('bioconductor-rpci-anvil')
+    AnVIL::avworkspace_name('Bioconductor-Gen3-demo')
+    TRUE
+}, error = function(...) {
+    FALSE
+})
+knitr::opts_chunk$set(eval = eval)
+options(width = getOption("width") - 4L)
+```
+
+# Introduction
+
+The goal of this vignette is to illustrate how Gen3 can be queried for
+inforamtion about sequencing-related files associated with samples,
+and how this information can be used to copy files to workspace
+buckets (e.g., for ready access in workspaces that do not otherwise
+require Gen3 access) or runtime instances (e.g., for analysis of the
+file itself).
+
+We assume familiarity with the 'Introduction to Gen3 in AnVIL'
+vignette included in this package.
+
+## Setup
+
+```{r, eval = FALSE}
+## Ensure latest software versions
+pkgs <- c("Bioconductor/Gen3", "Bioconductor/AnVIL")
+BiocManager::install(pkgs)
+```
+
+Load the Gen3 and dplyr libraries.
+
+```{r, message = FALSE}
+library(Gen3)
+library(dplyr)
+```
+
+# Obtain Gen3 files
+
+## Authenticate and navigate projects
+
+Start by authenticating, in the AnVIL environment or using the
+`gcloud` command-line API (internally, `authenticate()` uses the
+access token belonging to the active account returned by the command
+line `gcloud auth list`, so one should arrange for the active account
+to match the account registered with AnVIL / Terra).
+
+```{r}
+authenticate()
+```
+
+Discover Gen3 projects available to your AnVIL account.
+
+```{r}
+projects()
+```
+
+## Discover available sequencing-related files
+
+Query all projects for information about sequencing-related files. The
+first line represents fields of general relevance, the second line
+includes the `object_id` (essential for finding the location of
+associated files) as well as more human-friedly information about the
+files.
+
+```{r}
+v <- values(
+    "sequencing", "id", "project_id", "data_category",
+    "object_id", "file_name", "file_size", "file_state",
+    .n = 0
+)
+print(v)
+```
+
+For demonstration purposes we'll find the smallest file belonging to
+the open access 1000 Genomes project
+
+```{r}
+smallest <-
+    v %>%
+    filter(project_id == "open_access-1000Genomes") %>%
+    arrange(file_size) %>%
+    select(object_id, file_name, file_size) %>%
+    head(1)
+smallest
+```
+
+More relevant might be the VCF files (and VCF file indexes) in the project.
+
+```{r}
+vcf <-
+    v %>%
+    filter(endsWith(file_name, "vcf.gz") | endsWith(file_name, "vcf.gz.tbi"))
+vcf
+```
+
+Again we could identify the smallest vcf file
+
+```{r}
+smallest_vcf <-
+    vcf %>%
+    filter(endsWith(file_name, "vcf.gz")) %>%
+    arrange(file_size) %>%
+    select(object_id, file_name, file_size) %>%
+    head(1)
+smallest_vcf %>%
+    t() %>%
+    print()
+
+```
+
+## Obtaining information about files associated with objects
+
+N.B.: there is little value in copying files for no purpose; only copy
+files when the entire file must be located within the workspace,
+typically on the runtime compute instance.
+
+The key information relating the metadata about the file with the file
+itself is the `object_id`. For the smallest file, the `object_id` is
+
+```{r}
+object_id <-
+    smallest %>%
+    pull(object_id)
+print(object_id)
+```
+
+Use the `object_id` to learn about the file, e.g., it's location,
+creation time, length (size) and type of content.
+
+```{r}
+download_stat(object_id) %>%
+    print()
+```
+
+For the smallest VCF file, we have
+
+```{r}
+download_stat(smallest_vcf %>% pull(object_id))
+```
+
+## Download files to local disk or to other Google buckets 
+
+Use `download_object_id()` to download objects to local disk by
+providing the name of a file or directory for the download. Files
+cannot already exist at that location.
+
+```{r}
+tmp <- tempfile(); dir.create(tmp) # create a temporary direction
+fl <- download_object_id(object_id, tmp)
+print(fl) # file inside tmp
+
+file.info(fl) %>%
+    as_tibble(rownames = "file_name") %>%
+    mutate(object_id = object_id, file_name = basename(file_name)) %>%
+    select(object_id, everything())
+```
+
+Existing files cannot be over-written.
+
+```{r, error = TRUE}
+download_object_id(object_id, tmp)
+```
+
+The destination does not need to be a local file; it could instead be
+another google bucket, e.g., the bucket associated with the workspace
+
+```{r, eval = FALSE}
+download_object_id(object_id, AnVIL::avbucket())
+AnVIL::avfiles_ls()
+```
+
+# Creating AnVIL entity tables summarizing Gen3 data
+
+FIXME -- make `vcf` 'permanent' by creating a table of vcf 'entities'
+in the Terra Workspace GUI.
+
+# Session information
+
+```{r}
+sessionInfo()
+```

@@ -2,12 +2,12 @@
 % Please edit documentation in R/download.R
 \name{download_stat}
 \alias{download_stat}
-\alias{download_object}
+\alias{download_object_id}
 \title{Access and download objects from Gen3 google buckets}
 \usage{
 download_stat(object_id)
 
-download_object(object_id, destination)
+download_object_id(object_id, destination)
 }
 \arguments{
 \item{object_id}{character(1) object identifier returned from a
@@ -22,16 +22,16 @@ permissions, e.g., as returned by \code{AnVIL::avbucket()} in AnVIL.}
 \code{gcloud_sdk_result}, which when printed displays statistics on
 the object.
 
-\code{download_object()} returns the path or bucket in which the
-object was stored.
+\code{download_object_id()} returns the path or bucket in which
+the object was stored.
 }
 \description{
 \code{download_stat()} returns information about objects
 available for download from Gen3.
 
-\code{download_object()} retieves the object id to a local
-file system or another google bucket for which the user has
-write access.
+\code{download_object_id()} retieves the object id to a
+local file system or another google bucket for which the user
+has write access.
 }
 \details{
 These functions must be run in the AnVIL environment, or
@@ -55,10 +55,10 @@ download_stat(object_id)
 }
 
 \dontrun{
-destination <- download_object(object_id, tempfile())
+destination <- download_object_id(object_id, tempfile())
 file.info(destination) \%>\% as_tibble()
 
-destination <- download_object(object_id, AnVIL::avbucket())
+destination <- download_object_id(object_id, AnVIL::avbucket())
 destination
 AnVIL::avfiles_stat(destination)
 }

@@ -62,30 +62,30 @@ download_stat <-
 
 #' @rdname download
 #'
-#' @description `download_object()` retieves the object id to a local
-#'     file system or another google bucket for which the user has
-#'     write access.
+#' @description `download_object_id()` retieves the object id to a
+#'     local file system or another google bucket for which the user
+#'     has write access.
 #'
 #' @param destination character(1) location to retrieve the file,
 #'     either a local path or a 'gs://' uri with appropriate write
 #'     permissions, e.g., as returned by `AnVIL::avbucket()` in AnVIL.
 #'
-#' @return `download_object()` returns the path or bucket in which the
-#'     object was stored.
+#' @return `download_object_id()` returns the path or bucket in which
+#'     the object was stored.
 #'
 #' @examples
 #' \dontrun{
-#' destination <- download_object(object_id, tempfile())
+#' destination <- download_object_id(object_id, tempfile())
 #' file.info(destination) %>% as_tibble()
 #'
-#' destination <- download_object(object_id, AnVIL::avbucket())
+#' destination <- download_object_id(object_id, AnVIL::avbucket())
 #' destination
 #' AnVIL::avfiles_stat(destination)
 #' }
 #' @importFrom AnVIL gsutil_cp
 #'
 #' @export
-download_object <-
+download_object_id <-
     function(object_id, destination)
 {
     stopifnot(

@@ -1,6 +1,6 @@
 Package: Gen3
 Title: Interface to Gen3 Data Services Within AnVIL
-Version: 0.0.9
+Version: 0.0.10
 Authors@R: c(
     person(
         "Martin", "Morgan",

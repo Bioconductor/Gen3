@@ -1,5 +1,5 @@
 ---
-title: Accessing Gen3 in the AnVIL
+title: Introduction to Gen3 in the AnVIL
 author:
 - name: BJ Stubbs
 - name: Martin Morgan
@@ -7,7 +7,7 @@ package: Gen3
 output:
   BiocStyle::html_document
 vignette: |
-  %\VignetteIndexEntry{Accessing Gen3 in the AnVIL}
+  %\VignetteIndexEntry{Introduction to Gen3 in the AnVIL}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
